@@ -2,12 +2,14 @@ import React, {Component} from 'react'
 import axios from 'axios';
 import { appConstants } from '../constants';
 import { appStyle } from '../../style'
+import Dropzone from 'react-dropzone'
 
 export default class Dashboard extends Component {
 	constructor(props){
 		super(props);
 		this.state = {
-			list: []
+			list: [],
+			file: []
 		}
 	}
 
@@ -32,11 +34,46 @@ export default class Dashboard extends Component {
 	  }
 	} 
 
+	uploadExcelFile = async(file) => {
+		await axios.post(`${appConstants.WEB_SERVICE_URL}/tasks`, {file: file})
+	    .then(function (response) {
+	      if(response.status == 200){
+	      	 alert(response.data.message)
+	      }
+	    })
+	  .catch(error => { 
+	    alert(error)
+	   });
+	} 
+
+	handleUpload = (file) =>{
+		var context = this
+		 let reader = new FileReader();
+	    reader.readAsDataURL(file[0]);
+	    reader.onload = function (result) {
+	       context.uploadExcelFile(result.target.result)
+	    };
+	}
+
 	render(){
 		return(
 			<div>
 				<div style={appStyle.container}>
 					<h4>Test Task - Read data from excel sheet </h4>
+					<div style={{marginTop: 30}}>
+						<Dropzone onDrop={acceptedFiles => this.handleUpload(acceptedFiles)}>
+						  {({getRootProps, getInputProps}) => (
+						    <section>
+						      <div {...getRootProps()} style={{border: '1px solid', padding: 40}}>
+						        <input {...getInputProps()} />
+						        <p>Click here to load and uplaod file</p>
+						      </div>
+						    </section>
+						  )}
+						</Dropzone>
+					</div>
+
+					
 					<div style = {{marginTop: 50}}>
 						<button onClick={()=>{this.fetchDataFromExcel()}} type="button" class="btn btn-outline-primary">Fetch Value</button>
 					</div>
